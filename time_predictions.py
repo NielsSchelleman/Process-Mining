@@ -15,33 +15,26 @@ time_df.loc[:, 'event time:timestamp'] = (time_df['event time:timestamp'] - np.d
 # sort by case and event
 time_df = time_df.sort_values(by=['case concept:name', 'event time:timestamp'])
 
+# Fill in time difference and previous event
+time_df['delta'] = time_df['event time:timestamp'].diff()
+time_df['prev_event'] = time_df['event concept:name'].shift(1)
+
+time_df = time_df.set_index('case concept:name')
+
 # Make an empty df with identical columns
 t_df = time_df.drop([*time_df.index])
 
-# initiating time difference and previous event
-t_df['delta'] = 0
-t_df['prev_event'] = 0
+# Loop to get rid of the first event
+cases = np.unique(time_df.index)
 
-# Loop to create time difference by event on a case-by-case basis
-# Used as workaround to not mess up the values for the first event in a case
-cases = time_df['case concept:name'].unique()
-for case in cases:
-
+for case in np.nditer(cases): # not sure if speeds up
     # Filter a specific case
-    t = time_df.loc[time_df['case concept:name'].values == case, :]
-
-    # Fill in time difference and previous event
-    t.loc[: ,'delta'] = t['event time:timestamp'].diff()
-    t.loc[: ,'prev_event'] = t['event concept:name'].shift(1)
-
+    t = time_df.loc[case]
     # append all events related to one case
-    t_df = t_df.append(t)
+    t_df = t_df.append(t.iloc[1:])
 
+time_df = t_df.reset_index()
 
-time_df = t_df
-
-# Fill in the values for first event
-time_df[['delta', 'prev_event']] = time_df[['delta', 'prev_event']].fillna(0)
 
 # Calculating average time for every possible event transition
 time_pred_df = time_df[[
@@ -49,9 +42,10 @@ time_pred_df = time_df[[
     'event concept:name', 
     'delta']].groupby(['prev_event', 'event concept:name']).mean()
 
-# Get rid of the first event
+# Get rid of the grouping
 time_pred_df = time_pred_df.reset_index()
-time_pred_df = time_pred_df[time_pred_df['prev_event'] != 0]
+time_pred_df = time_pred_df.rename({'delta': 'delta_avg'})
 
 # Save
-time_pred_df.to_csv('data/predicted_times.csv')
+time_pred_df.to_csv('../data/predicted_times.csv')
+
