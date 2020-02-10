@@ -47,9 +47,10 @@ time_df[['delta', 'prev_event']] = time_df[['delta', 'prev_event']].fillna(0)
 time_pred_df = time_df[[
     'prev_event', 
     'event concept:name', 
-    'delta']].time_groupby(['prev_event', 'event concept:name']).mean()
+    'delta']].groupby(['prev_event', 'event concept:name']).mean()
 
 # Get rid of the first event
+time_pred_df = time_pred_df.reset_index()
 time_pred_df = time_pred_df[time_pred_df['prev_event'] != 0]
 
 # Save
