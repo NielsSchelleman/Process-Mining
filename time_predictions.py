@@ -47,5 +47,4 @@ time_pred_df = time_pred_df.reset_index()
 time_pred_df = time_pred_df.rename(columns={'delta': 'delta_avg'})
 
 # Save
-time_pred_df.to_csv('../data/predicted_times.csv')
-
+time_pred_df.to_csv('../data/predicted_times.csv', index=False)
