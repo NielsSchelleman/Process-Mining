@@ -58,13 +58,13 @@ def trainTime(df: pd.DataFrame) -> pd.DataFrame:
 
 def trainAcc(df: pd.DataFrame, time_pred_df: pd.DataFrame) -> pd.DataFrame:
     df = df.merge(time_pred_df, on=['prev_event', 'event concept:name'], how='left')
-    df['Training Acurracy'] =  np.round((100 * (df['delta'] - df['delta_pred'])) / df['delta'], 2)
-    return df['Training Acurracy'].describe()
+    df['Training Acurracy Deviation'] =  df['delta'] - df['delta_pred'] 
+    return df['Training Acurracy Deviation'].describe()
 
 
 def testAcc(df: pd.DataFrame) -> pd.DataFrame:
-    df['Testing Acurracy'] =  np.round((100 * (df['delta'] - df['delta_pred'])) / df['delta'], 2)
-    return df['Testing Acurracy'].describe()
+    df['Testing Acurracy Deviation'] =  df['delta'] - df['delta_pred']
+    return df['Testing Acurracy Deviation'].describe()
 
 
 def predTime(df: pd.DataFrame, time_pred_df: pd.DataFrame) -> pd.DataFrame:
@@ -73,9 +73,9 @@ def predTime(df: pd.DataFrame, time_pred_df: pd.DataFrame) -> pd.DataFrame:
 
 
 path = '/home/b/Studies/2IOI0/original_files/%s.csv'
+train_df = pd.read_csv(path % 'Road_Traffic_Fine_Management_Process-training')
+test_df = pd.read_csv(path % 'Road_Traffic_Fine_Management_Process-test')
 
-train_df = pd.read_csv(path % 'BPI_Challenge_2012-training')
-test_df = pd.read_csv(path % 'BPI_Challenge_2012-test')
 train_df = preprocess(train_df)
 test_df = preprocess(test_df)
 
